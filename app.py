@@ -1,0 +1,62 @@
+from flask import Flask,render_template,request
+import pickle
+import numpy as np
+
+# Load pre-processed data from pickle files
+df_popular = pickle.load(open('popular.pkl','rb'))
+pivot_tbl = pickle.load(open('pivot_tbl.pkl','rb'))
+books = pickle.load(open('books.pkl','rb'))
+similarity_scores = pickle.load(open('similarity_scores.pkl','rb'))
+
+# The application flow: ->
+# User visits homepage → sees popular books
+# User visits recommend page → sees book selection form
+# User selects a book → gets similar book recommendations
+# Recommendations are displayed with book details and images
+
+app = Flask(__name__)
+
+# Home Route (/): Displays popular books page
+@app.route('/')
+def index():
+    return render_template('index.html',
+                           book_name = list(df_popular['Book-Title'].values),
+                           author=list(df_popular['Book-Author'].values),
+                           image=list(df_popular['Image-URL-M'].values),
+                           votes=list(df_popular['total_num_rating'].values),
+                           rating=list(df_popular['avg_rating'].values)
+                           )
+# Recommend UI Route (/recommend): Shows recommendation form page
+@app.route('/recommend')
+def recommend_ui():
+    return render_template('recommend.html')
+
+# Book Recommendation Route (/recommend_books):
+@app.route('/recommend_books',methods=['post'])
+def recommend():
+
+    # Get Book title from form
+    user_input = request.form.get('user_input')
+
+    # Find book's index in pivot table
+    index = np.where(pivot_tbl.index == user_input)[0][0]
+    similar_items = sorted(list(enumerate(similarity_scores[index])), key=lambda x: x[1], reverse=True)[1:5]
+
+    # Prepare recommendation data
+    data = []
+    for i in similar_items:
+        item = []
+        temp_df = books[books['Book-Title'] == pivot_tbl.index[i[0]]]
+        item.extend(list(temp_df.drop_duplicates('Book-Title')['Book-Title'].values))
+        item.extend(list(temp_df.drop_duplicates('Book-Title')['Book-Author'].values))
+        item.extend(list(temp_df.drop_duplicates('Book-Title')['Image-URL-M'].values))
+
+        data.append(item)
+
+    print(data)
+
+    return render_template('recommend.html',data=data)
+
+# Main Execution - Runs the Flask application in debug mode
+if __name__ == '__main__':
+    app.run(debug=True)
