@@ -31,4 +31,10 @@ This model find the top 4 highly-rated books that meet these two conditions:
 * These ratings come from active readers who have rated 200 or more books
 * This analysis uses collaborative filtering, which makes recommendations based on user behavior patterns and preferences.
 
-  ### Demo 
+  ### Demo
+  #### Top 50 Books
+  <img width="2764" height="1738" alt="image" src="https://github.com/user-attachments/assets/ea9132d4-1a3d-4ef5-ad1d-a391184c508a" />
+
+  #### Recommendation -  Collaborative Based 
+  <img width="2646" height="1442" alt="image" src="https://github.com/user-attachments/assets/2b6b783e-f8d1-43a5-8b69-cc512ea94507" />
+
